@@ -57,22 +57,24 @@
                         <label for="input-string">Input String:</label>
                         <input type="text" id="input-string" placeholder="e.g., 101">
                     </div>
-                    
+                    <div class="speed-select">
+                        <label for="speed-select">Speed:</label>
+                        <select id="speed-select">
+                            <option value="slow">Slow</option>
+                            <option value="normal" selected>Normal</option>
+                            <option value="fast">Fast</option>
+                        </select>
+                    </div><br>
                     <div class="controls">
                         <button id="start-btn">Start</button>
                         <button id="play-btn" disabled>Play</button>
                         <button id="pause-btn" disabled>Pause</button>
                         <button id="step-btn" disabled>Step</button>
-                        <button id="reset-btn" disabled>Reset</button>
-                        <div class="speed-select">
-                            <label for="speed-select">Speed:</label>
-                            <select id="speed-select">
-                                <option value="slow">Slow</option>
-                                <option value="normal" selected>Normal</option>
-                                <option value="fast">Fast</option>
-                            </select>
-                        </div>
+                        
                     </div>
+                    <button id="reset-btn" disabled>Reset</button>
+                    
+                    <br>
 
                     <div id="simulation-status">
                         <p id="step-count">Step 0 of 0</p>
@@ -102,6 +104,25 @@
                 </div>
             </div>
         </main>
+        
+        <section class="info-section">
+            <div class="info-card">
+                <h3>About DFA</h3>
+                <p>A Deterministic Finite Automaton (DFA) is a finite state machine that accepts or rejects strings of symbols. For each state and input symbol, there is exactly one next state.</p>
+            </div>
+            <div class="info-card">
+                <h3>How to Use</h3>
+                <ol>
+                    <li>Define states and mark start/accepting states</li>
+                    <li>Add transitions between states</li>
+                    <li>Enter an input string and simulate</li>
+                </ol>
+            </div>
+            <div class="info-card">
+                <h3>Default Example</h3>
+                <p>The default DFA accepts all strings over {0,1} that end with "01". Try inputs like "1101", "01", "1010" to see the simulation.</p>
+            </div>
+        </section>
     </div>
 
     <script src="script.js"></script>
