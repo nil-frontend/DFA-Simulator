@@ -13,7 +13,19 @@ let simulationState = {
     remainingInput: '',
     history: [],
     isRunning: false,
-    intervalId: null
+    intervalId: null,
+    isPlaying: false,
+    speed: 'normal',
+    stepIndex: 0,
+    totalSteps: 0,
+    processed: [],
+    path: []
+};
+
+const speedMap = {
+    slow: 1000,
+    normal: 600,
+    fast: 300
 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -58,8 +70,10 @@ function initCy() {
                 selector: 'node.current',
                 style: {
                     'background-color': '#f1c40f',
-                    'transition-property': 'background-color',
-                    'transition-duration': '0.5s'
+                    'transition-property': 'background-color, box-shadow, transform',
+                    'transition-duration': '0.6s',
+                    'box-shadow': '0 0 15px rgba(241,196,15,0.7)',
+                    'transform': 'scale(1.08)'
                 }
             },
             {
@@ -80,7 +94,9 @@ function initCy() {
                 style: {
                     'line-color': '#f1c40f',
                     'target-arrow-color': '#f1c40f',
-                    'width': 4
+                    'width': 4,
+                    'transition-property': 'line-color, width',
+                    'transition-duration': '0.6s'
                 }
             }
         ],
@@ -96,6 +112,8 @@ function setupEventListeners() {
     document.getElementById('create-dfa-btn').addEventListener('click', updateDFA);
     
     document.getElementById('start-btn').addEventListener('click', startSimulation);
+    document.getElementById('play-btn').addEventListener('click', playSimulation);
+    document.getElementById('pause-btn').addEventListener('click', pauseSimulation);
     document.getElementById('step-btn').addEventListener('click', stepSimulation);
     document.getElementById('reset-btn').addEventListener('click', resetSimulation);
     document.getElementById('fit-btn').addEventListener('click', () => {
@@ -103,6 +121,25 @@ function setupEventListeners() {
             cy.fit();
         }
     });
+    const speedSelect = document.getElementById('speed-select');
+    if (speedSelect) {
+        speedSelect.addEventListener('change', (e) => {
+            simulationState.speed = e.target.value;
+            updateAnimationDuration();
+        });
+    }
+}
+
+function updateAnimationDuration() {
+    const ms = speedMap[simulationState.speed] || 600;
+    const dur = `${ms}ms`;
+    if (cy) {
+        cy.style()
+          .selector('node.current').style('transition-duration', dur)
+          .selector('edge.active').style('transition-duration', dur)
+          .update();
+    }
+    document.documentElement.style.setProperty('--animation-duration', dur);
 }
 
 function getInputValue(id) {
@@ -268,14 +305,17 @@ function startSimulation() {
     simulationState.remainingInput = inputString;
     simulationState.history = [];
     simulationState.isRunning = true;
+    simulationState.isPlaying = false;
+    simulationState.stepIndex = 0;
+    simulationState.totalSteps = inputString.length;
+    simulationState.processed = [];
+    simulationState.path = [dfa.startState];
     
     updateSimulationUI();
-    document.getElementById('step-btn').disabled = false;
-    document.getElementById('reset-btn').disabled = false;
-    document.getElementById('start-btn').disabled = true;
-    document.getElementById('input-string').disabled = true;
+    updateButtons();
     
     highlightState(simulationState.currentState);
+    updateAnimationDuration();
 }
 
 function stepSimulation() {
@@ -296,16 +336,19 @@ function stepSimulation() {
         simulationState.isRunning = false;
         document.getElementById('result-message').textContent = "Stuck! No transition defined. REJECTED";
         document.getElementById('result-message').className = "rejected";
-        document.getElementById('step-btn').disabled = true;
+        updateButtons();
         return;
     }
     
-    // Highlight Edge
-    // We don't have direct edge highlighting in this simple version easily without finding the specific edge ID
-    // which might be combined.
+    const edgeId = `${currentState}-${nextState}`;
+    cy.edges().removeClass('active');
+    highlightEdge(edgeId);
     
     simulationState.currentState = nextState;
     simulationState.remainingInput = simulationState.remainingInput.substring(1);
+    simulationState.processed.push(symbol);
+    simulationState.stepIndex += 1;
+    simulationState.path.push(nextState);
     
     updateSimulationUI();
     highlightState(nextState);
@@ -317,7 +360,12 @@ function stepSimulation() {
 
 function finishSimulation() {
     simulationState.isRunning = false;
-    document.getElementById('step-btn').disabled = true;
+    simulationState.isPlaying = false;
+    if (simulationState.intervalId) {
+        clearTimeout(simulationState.intervalId);
+        simulationState.intervalId = null;
+    }
+    updateButtons();
     
     const isAccepted = dfa.acceptStates.includes(simulationState.currentState);
     const resultEl = document.getElementById('result-message');
@@ -335,23 +383,38 @@ function resetSimulation() {
     simulationState.isRunning = false;
     simulationState.currentState = '';
     simulationState.remainingInput = '';
+    simulationState.isPlaying = false;
+    simulationState.stepIndex = 0;
+    simulationState.totalSteps = 0;
+    simulationState.processed = [];
+    simulationState.path = [];
+    if (simulationState.intervalId) {
+        clearTimeout(simulationState.intervalId);
+        simulationState.intervalId = null;
+    }
     
-    document.getElementById('start-btn').disabled = false;
-    document.getElementById('input-string').disabled = false;
-    document.getElementById('step-btn').disabled = true;
-    document.getElementById('reset-btn').disabled = true;
+    updateButtons(true);
     
     document.getElementById('current-state-display').textContent = '-';
     document.getElementById('remaining-input-display').textContent = '-';
     document.getElementById('result-message').textContent = '';
     document.getElementById('result-message').className = '';
+    document.getElementById('step-count').textContent = 'Step 0 of 0';
+    const ip = document.getElementById('input-progress');
+    if (ip) ip.innerHTML = '';
+    const pt = document.getElementById('path-taken');
+    if (pt) pt.innerHTML = '';
     
     cy.nodes().removeClass('current');
+    cy.edges().removeClass('active');
 }
 
 function updateSimulationUI() {
     document.getElementById('current-state-display').textContent = simulationState.currentState;
     document.getElementById('remaining-input-display').textContent = simulationState.remainingInput || "(empty)";
+    document.getElementById('step-count').textContent = `Step ${simulationState.stepIndex} of ${simulationState.totalSteps}`;
+    renderInputProgress();
+    renderPathTaken();
 }
 
 function highlightState(stateId) {
@@ -362,4 +425,85 @@ function highlightState(stateId) {
 
 function highlightEdge(edgeId) {
     cy.$(`#${edgeId}`).addClass('active');
+}
+
+function renderInputProgress() {
+    const container = document.getElementById('input-progress');
+    if (!container) return;
+    container.innerHTML = '';
+    simulationState.processed.forEach(ch => {
+        const pill = document.createElement('span');
+        pill.className = 'symbol-pill consumed';
+        pill.textContent = ch;
+        container.appendChild(pill);
+    });
+}
+
+function renderPathTaken() {
+    const container = document.getElementById('path-taken');
+    if (!container) return;
+    container.innerHTML = '';
+    simulationState.path.forEach((st, idx) => {
+        const pill = document.createElement('span');
+        pill.className = 'state-pill' + (idx === simulationState.path.length - 1 ? ' current' : '');
+        pill.textContent = st;
+        container.appendChild(pill);
+    });
+}
+
+function updateButtons(reset = false) {
+    const start = document.getElementById('start-btn');
+    const play = document.getElementById('play-btn');
+    const pause = document.getElementById('pause-btn');
+    const step = document.getElementById('step-btn');
+    const resetBtn = document.getElementById('reset-btn');
+    const inputEl = document.getElementById('input-string');
+    if (reset) {
+        start.disabled = false;
+        inputEl.disabled = false;
+        play.disabled = true;
+        pause.disabled = true;
+        step.disabled = true;
+        resetBtn.disabled = true;
+        return;
+    }
+    start.disabled = true;
+    inputEl.disabled = true;
+    step.disabled = !simulationState.isRunning;
+    resetBtn.disabled = !simulationState.isRunning && simulationState.stepIndex === 0;
+    const finished = !simulationState.isRunning && simulationState.stepIndex === simulationState.totalSteps;
+    play.disabled = finished || !simulationState.isRunning;
+    pause.disabled = finished || !simulationState.isRunning || !simulationState.isPlaying;
+}
+
+function playSimulation() {
+    if (!simulationState.isRunning) return;
+    simulationState.isPlaying = true;
+    updateButtons();
+    scheduleNextStep();
+}
+
+function scheduleNextStep() {
+    if (!simulationState.isPlaying) return;
+    if (simulationState.remainingInput.length === 0) {
+        finishSimulation();
+        return;
+    }
+    if (simulationState.intervalId) {
+        clearTimeout(simulationState.intervalId);
+        simulationState.intervalId = null;
+    }
+    simulationState.intervalId = setTimeout(() => {
+        stepSimulation();
+        scheduleNextStep();
+    }, speedMap[simulationState.speed] || 600);
+}
+
+function pauseSimulation() {
+    simulationState.isPlaying = false;
+    if (simulationState.intervalId) {
+        clearTimeout(simulationState.intervalId);
+        simulationState.intervalId = null;
+    }
+    updateButtons();
 }

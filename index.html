@@ -60,14 +60,34 @@
                     
                     <div class="controls">
                         <button id="start-btn">Start</button>
+                        <button id="play-btn" disabled>Play</button>
+                        <button id="pause-btn" disabled>Pause</button>
                         <button id="step-btn" disabled>Step</button>
                         <button id="reset-btn" disabled>Reset</button>
+                        <div class="speed-select">
+                            <label for="speed-select">Speed:</label>
+                            <select id="speed-select">
+                                <option value="slow">Slow</option>
+                                <option value="normal" selected>Normal</option>
+                                <option value="fast">Fast</option>
+                            </select>
+                        </div>
                     </div>
 
                     <div id="simulation-status">
-                        <p>Current State: <span id="current-state-display">-</span></p>
-                        <p>Remaining Input: <span id="remaining-input-display">-</span></p>
+                        <p id="step-count">Step 0 of 0</p>
+                        <p>Current: <span id="current-state-display">-</span></p>
+                        <div class="progress-block">
+                            <p>Input Progress:</p>
+                            <div id="input-progress"></div>
+                            <p>Remaining: <span id="remaining-input-display">-</span></p>
+                        </div>
                         <div id="result-message"></div>
+                    </div>
+                    
+                    <div id="path-container">
+                        <h3>Path Taken</h3>
+                        <div id="path-taken"></div>
                     </div>
                 </section>
             </div>
