@@ -98,6 +98,11 @@ function setupEventListeners() {
     document.getElementById('start-btn').addEventListener('click', startSimulation);
     document.getElementById('step-btn').addEventListener('click', stepSimulation);
     document.getElementById('reset-btn').addEventListener('click', resetSimulation);
+    document.getElementById('fit-btn').addEventListener('click', () => {
+        if (cy) {
+            cy.fit();
+        }
+    });
 }
 
 function getInputValue(id) {

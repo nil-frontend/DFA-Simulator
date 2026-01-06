@@ -195,6 +195,13 @@ button:disabled {
     gap: 15px;
 }
 
+.fit-btn {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    z-index: 10;
+}
+
 .legend-item {
     display: flex;
     align-items: center;
