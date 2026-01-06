@@ -1,0 +1,51 @@
+# DFA Simulator
+
+Design, visualize, and simulate Deterministic Finite Automata (DFA) in a dark, clean UI with smooth, speed-aware animations.
+
+Author: Nilkantha Dwibedi
+Live Link: https://nil-frontend.github.io/DFA-Simulator/
+
+## Overview
+- Define DFA components: states, alphabet, start state, accepting states, and transitions
+- Render an interactive graph of the DFA
+- Simulate input strings step-by-step with animated state and edge highlights
+- Control playback with Start, Play, Pause, Step, and Reset
+- Choose speed: Slow (1000ms), Normal (600ms), Fast (300ms)
+- Track input progress and see the path taken across states
+- Get Accepted/Rejected result when the input finishes
+
+## Features
+- Create/Update DFA graph from user inputs
+- Fit to Screen button to center/zoom the graph
+- Animated transitions:
+  - Current state glow and scale
+  - Active transition edge highlight
+- Input Progress:
+  - Consumed symbols shown as animated pills
+  - Remaining input displayed live
+- Path Taken:
+  - Sequence of visited states updated per step
+  - Current state highlighted
+- Deterministic, timer-based simulation with interruptible playback
+
+## Getting Started
+1. Open index.html in a modern browser (no build step required)
+2. Define states, alphabet, start and accepting states
+3. Set transitions (δ(state, symbol) = nextState)
+4. Click Create/Update DFA Graph
+5. Enter an input string and Start the simulation
+6. Use Play/Pause/Step/Reset and adjust Speed as needed
+
+## Default Example
+- The default DFA accepts all strings over {0,1} that end with "01"
+- Try inputs: "1101", "01", "1010"
+
+## Tech Stack
+- HTML, CSS, JavaScript
+- Cytoscape.js for graph visualization
+
+## Project Structure
+- index.html — UI layout and controls
+- style.css — Dark theme and animation styles
+- script.js — DFA data, Cytoscape rendering, and simulation state machine
+
