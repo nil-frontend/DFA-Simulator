@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DFA Simulator</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Cytoscape.js for Graph Visualization -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>DFA Simulator</h1>
+            <p>Design, Visualize, and Simulate Deterministic Finite Automata</p>
+        </header>
+
+        <main>
+            <div class="control-panel">
+                <section id="dfa-definition">
+                    <h2>1. Define DFA</h2>
+                    
+                    <div class="input-group">
+                        <label for="states-input">States (comma separated, e.g., q0, q1):</label>
+                        <input type="text" id="states-input" placeholder="q0, q1, q2" value="q0, q1, q2">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="alphabet-input">Alphabet (comma separated, e.g., 0, 1):</label>
+                        <input type="text" id="alphabet-input" placeholder="0, 1" value="0, 1">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="start-state-input">Start State:</label>
+                        <input type="text" id="start-state-input" placeholder="q0" value="q0">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="accept-states-input">Accepting States (comma separated):</label>
+                        <input type="text" id="accept-states-input" placeholder="q2" value="q2">
+                    </div>
+
+                    <div class="transitions-container">
+                        <h3>Transitions</h3>
+                        <div id="transitions-inputs">
+                            <!-- Transition inputs will be generated here -->
+                        </div>
+                        <button id="generate-transitions-btn">Set Transitions</button>
+                    </div>
+
+                    <button id="create-dfa-btn" class="primary-btn">Create/Update DFA Graph</button>
+                </section>
+
+                <section id="simulation-controls">
+                    <h2>2. Simulate</h2>
+                    <div class="input-group">
+                        <label for="input-string">Input String:</label>
+                        <input type="text" id="input-string" placeholder="e.g., 101">
+                    </div>
+                    
+                    <div class="controls">
+                        <button id="start-btn">Start</button>
+                        <button id="step-btn" disabled>Step</button>
+                        <button id="reset-btn" disabled>Reset</button>
+                    </div>
+
+                    <div id="simulation-status">
+                        <p>Current State: <span id="current-state-display">-</span></p>
+                        <p>Remaining Input: <span id="remaining-input-display">-</span></p>
+                        <div id="result-message"></div>
+                    </div>
+                </section>
+            </div>
+
+            <div class="visualization-panel">
+                <div id="cy"></div>
+                <div class="legend">
+                    <span class="legend-item"><span class="dot start"></span> Start State</span>
+                    <span class="legend-item"><span class="dot current"></span> Current State</span>
+                    <span class="legend-item"><span class="dot accept"></span> Accept State</span>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
